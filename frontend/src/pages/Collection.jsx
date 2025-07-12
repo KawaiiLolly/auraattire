@@ -1,17 +1,30 @@
-import React, { useContext, useEffect, useLayoutEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import Title from '../component/Title'
 import ProductItems from '../component/ProductItems'
+import axios from 'axios'
 
 const Collection = () => {
-  const { products, search, showSearch } = useContext(ShopContext)
+  const { search, showSearch } = useContext(ShopContext)
   const [showFilter, setShowFilter] = useState(false)
   const [filterProducts, setFilterProducts] = useState(() => [])
-
   const [category, setCategory] = useState([]);
   const [subCategory, setSubCategory] = useState([])
   const [sortType, setSortType] = useState('relevant')
+  const [products, setProducts] = useState([])
+
+   useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const res = await axios.get('http://localhost:4000/api/product/list')
+                setProducts(res.data.products)
+            } catch (err) {
+                console.error('Failed to fetch products:', err)
+            } 
+        }
+        fetchProducts()
+    }, [])
 
   const toggleCategory = (e) => {
     if (category.includes(e.target.value)) {
@@ -30,6 +43,7 @@ const Collection = () => {
   }
 
   const applyFilter = () => {
+
     let productsCopy = products.slice()
     if (category.length > 0) {
       productsCopy = productsCopy.filter(item => category.includes(item.category))
@@ -60,7 +74,7 @@ const Collection = () => {
 
   useEffect(() => {
     applyFilter()
-  }, [category, subCategory, search, showSearch]) 
+  }, [products, category, subCategory, search, showSearch]) 
 
   useEffect(() => {
     sortProduct()
@@ -110,7 +124,7 @@ const Collection = () => {
           <Title text1={'All'} text2={'Collections'} />
           {/* Product Sort */}
           <select className='border-2 border-gray-300 text-sm px-2' onChange={(e) => setSortType(e.target.value)}>
-            <option value="relevent">Sort by: Relevent</option>
+            <option value="relevant">Sort by: Relevant</option>
             <option value="low-high">Sort by: Low to High</option>
             <option value="high-low">Sort by: High to low</option>
           </select>

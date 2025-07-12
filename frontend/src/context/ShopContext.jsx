@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { backendUrl } from '../App'
-import { products } from "../assets/assets";
+// import { products } from "../assets/assets";
 import axios from 'axios'
 export const ShopContext = createContext()
 
@@ -13,7 +13,19 @@ const ShopContextProvider = (props) => {
     const [showSearch, setShowSearch] = useState(false)
     const [cartItems, setCartItems] = useState({});
     const navigate = useNavigate();
-    
+    const [products, setProducts] = useState([])
+
+   useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const res = await axios.get('http://localhost:4000/api/product/list')
+                setProducts(res.data.products)
+            } catch (err) {
+                console.error('Failed to fetch products:', err)
+            } 
+        }
+        fetchProducts()
+    }, [])
 
     const addToCart = async (itemId, size) => {
 
@@ -78,10 +90,6 @@ const ShopContextProvider = (props) => {
     }
 
 
-    // useEffect(() => {
-    //     getProductsData()
-    // }, [products])
-
     const value = {
         products, currency, delievery_fee,
         search, setSearch, showSearch, setShowSearch,
@@ -95,6 +103,6 @@ const ShopContextProvider = (props) => {
             {props.children}
         </ShopContext.Provider>
     )
-}
+}   
 
 export default ShopContextProvider
